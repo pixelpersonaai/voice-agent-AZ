@@ -1,9 +1,7 @@
 import { Message, useChat } from "ai/react";
 
 export default function Home() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    keepLastMessageOnError: true,
-  });
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#C4E2F5B5] to-[#FFFFFFB5]">
       <div className="w-full flex flex-col items-center justify-center h-[58vh] overflow-y-grow pb-2 bg-yellow-200">
