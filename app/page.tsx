@@ -23,6 +23,21 @@ export default function Home() {
         role: "user",
         content: "Hello, how are you doing?",
       },
+      {
+        id: "3",
+        role: "assistant",
+        content: "Bonjour, comment allez-vous?",
+      },
+      {
+        id: "4",
+        role: "user",
+        content: "I'm doing well, thank you. How are you?",
+      },
+      {
+        id: "5",
+        role: "assistant",
+        content: "Je vais bien, merci. Comment allez-vous?",
+      },
     ],
     keepLastMessageOnError: true,
   });
@@ -31,9 +46,10 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[#00BFFF80] to-[#87CEFAB5] w-full">
+      <div className="min-h-screen bg-white w-full bg-slate-100">
+        {/*  */}
         <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
-          <div className="w-3/5 flex flex-col justify-center bg-yellow-200">
+          <div className="w-3/5 flex flex-col justify-center bg-white rounded-lg p-4 shadow-md">
             {messages.map((message: Message, index: number) => {
               return (
                 // Chat History
@@ -50,10 +66,10 @@ export default function Home() {
                         return (
                           <>
                             {message.role === "user" ? (
-                              <div className="flex my-2 justify-end ">
+                              <div className="flex my-2 justify-end">
                                 <div
                                   key={message.id + index}
-                                  className="bg-sky-100 text-sm text-blue-700 rounded-lg px-2 py-2 "
+                                  className="bg-sky-100 text-sm text-blue-700 rounded-lg px-2 py-1"
                                 >
                                   {currentText}
                                 </div>
@@ -66,13 +82,16 @@ export default function Home() {
                             ) : (
                               <div className="flex my-2 justify-start">
                                 <div className="mx-2">
-                                  <button className="rounded-full bg-blue-500 p-1 text-white">
-                                    <Sparkles size={24} />
+                                  <button className="rounded-full bg-sky-100 p-2 text-white">
+                                    <Sparkles
+                                      className="text-blue-600"
+                                      size={20}
+                                    />
                                   </button>
                                 </div>
                                 <div
                                   key={message.id + index}
-                                  className="bg-blue-500 text-sm text-white px-2 py-2 rounded-lg "
+                                  className="bg-blue-500 text-sm text-white px-2 py-1 rounded-lg"
                                 >
                                   {currentText}
                                 </div>
