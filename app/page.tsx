@@ -1,56 +1,129 @@
 "use client";
 import { Message, useChat } from "ai/react";
+import {
+  AudioLinesIcon,
+  CircleUserIcon,
+  MicIcon,
+  Sparkles,
+  SquareIcon,
+} from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
+    initialMessages: [
+      {
+        id: "1",
+        role: "system",
+        content:
+          "You are a helpful assistant that translates English to French.",
+      },
+      {
+        id: "2",
+        role: "user",
+        content: "Hello, how are you doing?",
+      },
+    ],
     keepLastMessageOnError: true,
-    onFinish: async (message: Message) => {},
   });
+  const [recordingReady, setRecordingReady] = useState(false);
+  const [recordingStared, setRecordingStared] = useState(false);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#C4E2F5B5] to-[#FFFFFFB5]">
-      <div className="w-full flex flex-col items-center justify-center h-[58vh] overflow-y-grow pb-2 bg-yellow-200">
-        {messages.map((message: Message, index: number) => {
-          return (
-            // Chat History
-            <div key={message.id} className="flex flex-col gird grid-cols-8">
-              {message.content
-                .split("\n")
-                .map((currentText: string, index: number) => {
-                  if (currentText === "") {
-                    return <p key={message.id}>&nbsp;&nbsp;&nbsp;</p>;
-                  } else {
-                    return (
-                      <>
-                        {message.role === "user" ? (
-                          <div className="flex my-2 justify-end ">
-                            <div
-                              key={message.id + index}
-                              className="bg-sky-100 text-sm text-blue-700 rounded-lg px-2 py-2 "
-                            >
-                              {currentText}
-                            </div>
-                            <div className="mx-2">
-                              <button className="rounded-full">User</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex my-2 justify-start">
-                            <div
-                              key={message.id + index}
-                              className="bg-blue-500 text-sm text-white px-2 py-2 rounded-lg "
-                            >
-                              {currentText}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    );
-                  }
-                })}
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-[#00BFFF80] to-[#87CEFAB5] w-full">
+        <div className="w-full flex flex-col justify-center h-[98vh] overflow-y-grow pb-2">
+          <div className="w-3/5 flex flex-col justify-center bg-yellow-200">
+            {messages.map((message: Message, index: number) => {
+              return (
+                // Chat History
+                <div
+                  key={message.id}
+                  className="flex flex-col gird grid-cols-8"
+                >
+                  {message.content
+                    .split("\n")
+                    .map((currentText: string, index: number) => {
+                      if (currentText === "") {
+                        return <p key={message.id}>&nbsp;&nbsp;&nbsp;</p>;
+                      } else {
+                        return (
+                          <>
+                            {message.role === "user" ? (
+                              <div className="flex my-2 justify-end ">
+                                <div
+                                  key={message.id + index}
+                                  className="bg-sky-100 text-sm text-blue-700 rounded-lg px-2 py-2 "
+                                >
+                                  {currentText}
+                                </div>
+                                <div className="mx-2">
+                                  <button className="rounded-full bg-blue-500 p-1 text-white">
+                                    <CircleUserIcon size={24} />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex my-2 justify-start">
+                                <div className="mx-2">
+                                  <button className="rounded-full bg-blue-500 p-1 text-white">
+                                    <Sparkles size={24} />
+                                  </button>
+                                </div>
+                                <div
+                                  key={message.id + index}
+                                  className="bg-blue-500 text-sm text-white px-2 py-2 rounded-lg "
+                                >
+                                  {currentText}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      }
+                    })}
+                </div>
+              );
+            })}
+          </div>
+          {/* Input */}
+          <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
+            <div className="flex space-x-4">
+              {recordingReady ? (
+                <div className="flex items-center bg-blue-500 text-white rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-600 bg-white ">
+                  <span className="flex justify-center items-center w-full text-gray-400">
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                  </span>
+                  <button
+                    className="flex justify-end items-center p-0.5 border border-transparent  hover:border-red-500 hover:rounded-sm"
+                    onClick={() => {
+                      setRecordingReady((prev) => !prev);
+                    }}
+                  >
+                    <SquareIcon
+                      size={20}
+                      className="bg-red-500 text-red-500 rounded-sm"
+                    />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-white hover:bg-blue-500 hover:text-white"
+                  onClick={() => {
+                    setRecordingReady((prev) => !prev);
+                    setRecordingStared((prev) => !prev);
+                  }}
+                >
+                  Speak to Agent
+                </button>
+              )}
             </div>
-          );
-        })}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
