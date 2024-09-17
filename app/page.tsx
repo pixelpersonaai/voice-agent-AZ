@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-[#00BFFF80] to-[#87CEFAB5] w-full">
-        <div className="w-full flex flex-col justify-center h-[98vh] overflow-y-grow pb-2">
+        <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
           <div className="w-3/5 flex flex-col justify-center bg-yellow-200">
             {messages.map((message: Message, index: number) => {
               return (
