@@ -1,14 +1,7 @@
 "use client";
 import { Message, useChat } from "ai/react";
-import {
-  AudioLinesIcon,
-  CircleUserIcon,
-  LogOutIcon,
-  MicIcon,
-  Sparkles,
-  SquareIcon,
-} from "lucide-react";
-import { useState } from "react";
+import { CircleUserIcon, LogOutIcon, Sparkles } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   AudioConfig,
   ResultReason,
@@ -16,6 +9,64 @@ import {
   SpeechRecognizer,
   SpeechSynthesizer,
 } from "microsoft-cognitiveservices-speech-sdk";
+
+type SetRecognizedTranscript = Dispatch<SetStateAction<string>>;
+type SetRecognizingTranscript = Dispatch<SetStateAction<string>>;
+
+const useSpeechRecognition = (
+  setRecognizedTranscript: SetRecognizedTranscript,
+  setRecognizingTranscript: SetRecognizingTranscript
+) => {
+  const [speechRecognizer, setSpeechRecognizer] =
+    useState<SpeechRecognizer | null>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [speechConfig, setSpeechConfig] = useState<SpeechConfig | null>(null);
+
+  // Start speech recognition
+  const handleButtonClick = async () => {
+    try {
+      if (speechConfig && audioContext) {
+        if (!audioContext.state || audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        // Start the Speech SDK recognition when the AudioContext is ready
+        const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
+        const recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+        recognizer.recognizing = (_, event) => {
+          // Handle recognizing event
+          console.log(event.result.text);
+          setRecognizingTranscript(event.result.text);
+        };
+
+        recognizer.recognized = (_, event) => {
+          if (event.result.reason === ResultReason.RecognizedSpeech) {
+            // Update the state with the recognized speech
+            setRecognizedTranscript((prev) => prev + " " + event.result.text);
+            setRecognizingTranscript("");
+          }
+        };
+
+        recognizer.startContinuousRecognitionAsync();
+
+        setSpeechRecognizer(recognizer);
+      }
+    } catch (error) {
+      console.error("Error handling button click:", error);
+    }
+  };
+
+  // Stop speech recognition
+  const stopRecognition = () => {
+    if (speechRecognizer) {
+      speechRecognizer.stopContinuousRecognitionAsync();
+      setSpeechRecognizer(null);
+    }
+  };
+
+  return { handleButtonClick, stopRecognition };
+};
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit } = useChat({
@@ -58,7 +109,7 @@ export default function Home() {
         {/*  */}
         <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
           <div className="relative w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md">
-            <div className="absolute inset-0 m-0.5 bg-gradient-to-br from-pink-300 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur"></div>
+            <div className="absolute inset-0 m-1 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur"></div>
             <div className="relative flex flex-col justify-center rounded-lg bg-white">
               {messages.map((message: Message, index: number) => {
                 return (
