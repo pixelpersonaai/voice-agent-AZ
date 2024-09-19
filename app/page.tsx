@@ -102,6 +102,22 @@ export default function Home() {
   });
   const [recordingReady, setRecordingReady] = useState(false);
   const [recordingStared, setRecordingStared] = useState(false);
+  // get initial messages
+  const initialMessage = async () => {
+    try {
+      const response = await fetch("/api/initialMessage", { method: "GET" });
+      // Check if the response status is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // console.log("initialMessage: ", response);
+      const data = await response.json();
+      messages.push(data);
+    } catch (error) {
+      console.error("Error fetching initial message:", error);
+    }
+  };
 
   return (
     <>
