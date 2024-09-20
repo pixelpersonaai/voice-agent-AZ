@@ -125,7 +125,7 @@ export default function Home() {
         {/*  */}
         <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
           <div className="relative w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md">
-            <div className="absolute inset-0 m-1 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
             <div className="relative flex flex-col justify-center rounded-lg bg-white">
               {messages.map((message: Message, index: number) => {
                 return (
@@ -146,7 +146,7 @@ export default function Home() {
                                 <div className="flex my-2 justify-end">
                                   <div
                                     key={message.id + index}
-                                    className="bg-sky-100 text-sm text-blue-700 rounded-lg px-2 py-1"
+                                    className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1"
                                   >
                                     {currentText}
                                   </div>
@@ -169,7 +169,7 @@ export default function Home() {
                                   </div>
                                   <div
                                     key={message.id + index}
-                                    className="bg-blue-500 text-sm text-white px-2 py-1 rounded-lg"
+                                    className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg"
                                   >
                                     {currentText}
                                   </div>
