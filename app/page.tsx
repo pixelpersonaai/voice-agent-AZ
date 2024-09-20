@@ -9,6 +9,7 @@ import {
   SpeechRecognizer,
   SpeechSynthesizer,
 } from "microsoft-cognitiveservices-speech-sdk";
+import { cn } from "@/lib/utils";
 
 type SetRecognizedTranscript = Dispatch<SetStateAction<string>>;
 type SetRecognizingTranscript = Dispatch<SetStateAction<string>>;
@@ -100,6 +101,8 @@ export default function Home() {
     ],
     keepLastMessageOnError: true,
   });
+  const [startInterview, setStartInterview] = useState(false);
+  const [endInterview, setEndInterview] = useState(false);
   const [recordingReady, setRecordingReady] = useState(false);
   const [recordingStared, setRecordingStared] = useState(false);
   // get initial messages
@@ -188,13 +191,25 @@ export default function Home() {
           <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
             <div className="w-full flex justify-center items-center">
               <button
-                className="flex justify-center text-sm items-center bg-white bottom-0 inset-x-0 rounded-lg px-4 font-semibold font-sans  h-[48px] text-blue-500 hover:bg-blue-500 hover:text-white"
+                className={cn(
+                  "flex justify-center text-sm items-center bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-semibold font-sans h-[48px] text-white",
+                  !startInterview &&
+                    "bg-blue-500 hover:bg-blue-600 hover:text-white",
+                  startInterview &&
+                    "bg-red-500 hover:bg-red-600 hover:text-white"
+                )}
                 onClick={() => {
                   setRecordingReady((prev) => !prev);
                   setRecordingStared((prev) => !prev);
+                  if (startInterview) {
+                    setEndInterview((prev) => !prev);
+                  } else {
+                    setStartInterview((prev) => !prev);
+                  }
                 }}
               >
-                <LogOutIcon size={16} className="mr-2" /> End Interview
+                <LogOutIcon size={16} className="mr-2" />{" "}
+                {recordingStared ? "End" : "Start"} {"Interview"}
               </button>
             </div>
           </div>
