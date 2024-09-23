@@ -145,10 +145,14 @@ export default function Home() {
     ],
     keepLastMessageOnError: true,
   });
+  let speechToken: any;
   const [startInterview, setStartInterview] = useState(false);
   const [endInterview, setEndInterview] = useState(false);
   const [recordingReady, setRecordingReady] = useState(false);
   const [recordingStared, setRecordingStared] = useState(false);
+  const [aiSpeakingDuration, setAiSpeakingDuration] = useState(0);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [aiResponseFinished, setAiResponseFinished] = useState(false);
   // get initial messages
   const initialMessage = async () => {
     try {
@@ -165,6 +169,58 @@ export default function Home() {
       console.error("Error fetching initial message:", error);
     }
   };
+
+  // Text to Speech
+  const textToSpeech = async (message: Message) => {
+    if (!speechToken) {
+      const tokenObj = await getTokens();
+      if (tokenObj) {
+        console.log("tokenObj: ", tokenObj);
+        speechToken = tokenObj;
+      }
+    }
+
+    const speechConfig = SpeechConfig.fromAuthorizationToken(
+      speechToken.authToken,
+      speechToken.region
+    );
+
+    speechConfig.speechSynthesisVoiceName = "EN-US-AriaNeural";
+    const speechSynthesizer = new SpeechSynthesizer(speechConfig);
+
+    speechSynthesizer.speakTextAsync(
+      message.content,
+      (result) => {
+        speechSynthesizer.close();
+        // console.log("Play Time：", result.audioDuration / 10000000);
+        setAiSpeakingDuration(result.audioDuration / 10000000);
+        setIsAISpeaking(true);
+        return result.audioData;
+      },
+      (error) => {
+        console.log(error);
+        speechSynthesizer.close();
+      }
+    );
+  };
+
+  // Trigger text to speech
+  useEffect(() => {
+    if (aiResponseFinished && messages.length > 0) {
+      if (messages[messages.length - 1].role === "assistant") {
+        textToSpeech(messages[messages.length - 1]);
+        const timer = setTimeout(() => {
+          setIsAISpeaking(false);
+        }, aiSpeakingDuration);
+        return () => {
+          setIsAISpeaking(false);
+          clearTimeout(timer);
+          setIsAISpeaking(false);
+        };
+      }
+    }
+    console.log(messages);
+  }, [aiResponseFinished]);
 
   return (
     <>
