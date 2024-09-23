@@ -1,7 +1,7 @@
 "use client";
 import { Message, useChat } from "ai/react";
 import { CircleUserIcon, LogOutIcon, Sparkles } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
   AudioConfig,
   ResultReason,
@@ -10,6 +10,7 @@ import {
   SpeechSynthesizer,
 } from "microsoft-cognitiveservices-speech-sdk";
 import { cn } from "@/lib/utils";
+import { getTokens } from "./actions/getTokens";
 
 type SetRecognizedTranscript = Dispatch<SetStateAction<string>>;
 type SetRecognizingTranscript = Dispatch<SetStateAction<string>>;
@@ -22,6 +23,49 @@ const useSpeechRecognition = (
     useState<SpeechRecognizer | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [speechConfig, setSpeechConfig] = useState<SpeechConfig | null>(null);
+
+  useEffect(() => {
+    const initializeSpeechSDK = async () => {
+      try {
+        const { authToken, region } = await getTokens();
+        const config = SpeechConfig.fromAuthorizationToken(authToken, region);
+        config.speechRecognitionLanguage = "zh-CN";
+
+        setSpeechConfig(config);
+
+        // Initialize the AudioContext here in response to a user gesture (button click)
+        const context = new AudioContext();
+        setAudioContext(context);
+
+        const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
+        const recognizer = new SpeechRecognizer(config, audioConfig);
+
+        recognizer.recognizing = (
+          _: any,
+          event: { result: { reason: any; text: string } }
+        ) => {
+          // Handle recognizing event
+          setRecognizingTranscript(event.result.text);
+        };
+
+        recognizer.recognized = (
+          _: any,
+          event: { result: { reason: any; text: string } }
+        ) => {
+          if (event.result.reason === ResultReason.RecognizedSpeech) {
+            // Update the state with the recognized speech
+            setRecognizedTranscript((prev) => prev + " " + event.result.text);
+          }
+        };
+
+        setSpeechRecognizer(recognizer);
+      } catch (error) {
+        console.error("Error initializing Speech SDK:", error);
+      }
+    };
+
+    initializeSpeechSDK();
+  }, [setRecognizedTranscript]);
 
   // Start speech recognition
   const handleButtonClick = async () => {
