@@ -5,7 +5,7 @@ const openai = new OpenAI({
 });
 
 export async function GET(req: Request) {
-  const response = await openai.completions.create({
+  const response = await openai.chat.completions.create({
     model: "gpt-4o",
     max_tokens: 200,
     messages: [
