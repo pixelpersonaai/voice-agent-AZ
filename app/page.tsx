@@ -280,7 +280,9 @@ export default function Home() {
                       .split("\n")
                       .map((currentText: string, index: number) => {
                         if (currentText === "") {
-                          return <p key={message.id}>&nbsp;&nbsp;&nbsp;</p>;
+                          return (
+                            <p key={index + message.id}>&nbsp;&nbsp;&nbsp;</p>
+                          );
                         } else {
                           return (
                             <>
@@ -345,6 +347,7 @@ export default function Home() {
                   } else {
                     setStartInterview((prev) => !prev);
                   }
+                  handleButtonClick();
                 }}
               >
                 <LogOutIcon size={16} className="mr-2" />{" "}
