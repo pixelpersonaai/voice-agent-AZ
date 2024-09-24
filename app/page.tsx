@@ -114,37 +114,42 @@ const useSpeechRecognition = (
 };
 
 export default function Home() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    initialMessages: [
-      {
-        id: "1",
-        role: "system",
-        content:
-          "You are a helpful assistant that translates English to French.",
+  const { messages, input, handleInputChange, handleSubmit, setInput } =
+    useChat({
+      initialMessages: [
+        {
+          id: "1",
+          role: "system",
+          content:
+            "You are a helpful assistant that translates English to French.",
+        },
+        {
+          id: "2",
+          role: "user",
+          content: "Hello, how are you doing?",
+        },
+        {
+          id: "3",
+          role: "assistant",
+          content: "Bonjour, comment allez-vous?",
+        },
+        {
+          id: "4",
+          role: "user",
+          content: "I'm doing well, thank you. How are you?",
+        },
+        {
+          id: "5",
+          role: "assistant",
+          content: "Je vais bien, merci. Comment allez-vous?",
+        },
+      ],
+      keepLastMessageOnError: true,
+      onFinish: async (message: Message) => {
+        setAiResponseFinished(true);
+        console.log("AI response finished");
       },
-      {
-        id: "2",
-        role: "user",
-        content: "Hello, how are you doing?",
-      },
-      {
-        id: "3",
-        role: "assistant",
-        content: "Bonjour, comment allez-vous?",
-      },
-      {
-        id: "4",
-        role: "user",
-        content: "I'm doing well, thank you. How are you?",
-      },
-      {
-        id: "5",
-        role: "assistant",
-        content: "Je vais bien, merci. Comment allez-vous?",
-      },
-    ],
-    keepLastMessageOnError: true,
-  });
+    });
   let speechToken: any;
   const [startInterview, setStartInterview] = useState(false);
   const [endInterview, setEndInterview] = useState(false);
@@ -153,6 +158,15 @@ export default function Home() {
   const [aiSpeakingDuration, setAiSpeakingDuration] = useState(0);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [aiResponseFinished, setAiResponseFinished] = useState(false);
+  const [combinedTranscript, setCombinedTranscript] = useState("");
+  const [recognizedTranscript, setRecognizedTranscript] = useState("");
+  const [recognizingTranscript, setRecognizingTranscript] = useState("");
+
+  const { handleButtonClick, stopRecognition } = useSpeechRecognition(
+    setRecognizedTranscript,
+    setRecognizingTranscript
+  );
+
   // get initial messages
   const initialMessage = async () => {
     try {
@@ -221,6 +235,31 @@ export default function Home() {
     }
     console.log(messages);
   }, [aiResponseFinished]);
+
+  // Automatically submit the form after 2 seconds of inactivity
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
+
+  // Submit only if the form is not empty and 2 seconds have passed
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const timeSinceLastUpdate = Date.now() - lastUpdate;
+      if (
+        !aiResponseFinished &&
+        timeSinceLastUpdate >= 2500 &&
+        input.length > 0
+      ) {
+        setInput(combinedTranscript);
+        handleSubmit();
+        setRecognizedTranscript("");
+        setCombinedTranscript("");
+      }
+      setLastUpdate(Date.now());
+      setAiResponseFinished(false);
+    }, 2500);
+
+    // Clean up the timer
+    return () => clearInterval(interval);
+  }, [lastUpdate, aiResponseFinished]);
 
   return (
     <>
