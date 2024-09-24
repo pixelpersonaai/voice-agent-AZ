@@ -167,20 +167,20 @@ export default function Home() {
     setRecognizingTranscript
   );
 
-  // get initial messages
-  const initialMessage = async () => {
+  // get starting messages
+  const startingMessage = async () => {
     try {
-      const response = await fetch("/api/initialMessage", { method: "GET" });
+      const response = await fetch("/api/startingMessage", { method: "GET" });
       // Check if the response status is OK
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // console.log("initialMessage: ", response);
+      // console.log("startingMessage: ", response);
       const data = await response.json();
       messages.push(data);
     } catch (error) {
-      console.error("Error fetching initial message:", error);
+      console.error("Error fetching starting message:", error);
     }
   };
 
