@@ -19,15 +19,15 @@ export async function GET(req: Request) {
   });
 
   const res = (await response).choices[0].message.content;
-  return new Response(JSON.stringify(response.data), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    JSON: {
+  return new Response(
+    JSON.stringify({
+      status: 200,
       id: v4(),
       role: "assistant",
       content: res,
-    },
-  });
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
 }
