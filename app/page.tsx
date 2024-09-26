@@ -151,7 +151,7 @@ export default function Home() {
       },
     });
   let speechToken: any;
-  const [interviewEnded, setInterviewEnded] = useState(true);
+  const [interviewEnded, setInterviewEnded] = useState(false);
   const [startInterview, setStartInterview] = useState(false);
   const [endInterview, setEndInterview] = useState(false);
   const [recordingReady, setRecordingReady] = useState(false);
@@ -355,6 +355,9 @@ export default function Home() {
                       setStartInterview((prev) => !prev);
                     }
                     handleButtonClick();
+                    if (!interviewEnded && startInterview) {
+                      setInterviewEnded((prev) => !prev);
+                    }
                   }}
                 >
                   <LogOutIcon size={16} className="mr-2" />{" "}
