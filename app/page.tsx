@@ -151,6 +151,7 @@ export default function Home() {
       },
     });
   let speechToken: any;
+  const [interviewEnded, setInterviewEnded] = useState(true);
   const [startInterview, setStartInterview] = useState(false);
   const [endInterview, setEndInterview] = useState(false);
   const [recordingReady, setRecordingReady] = useState(false);
@@ -263,100 +264,107 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-white w-full bg-slate-100">
-        {/*  */}
-        <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
-          <div className="relative w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md">
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
-            <div className="relative flex flex-col justify-center rounded-lg bg-white">
-              {messages.map((message: Message, index: number) => {
-                return (
-                  // Chat History
-                  <div
-                    key={message.id}
-                    className="flex flex-col gird grid-cols-8"
-                  >
-                    {message.content
-                      .split("\n")
-                      .map((currentText: string, index: number) => {
-                        if (currentText === "") {
-                          return (
-                            <p key={index + message.id}>&nbsp;&nbsp;&nbsp;</p>
-                          );
-                        } else {
-                          return (
-                            <>
-                              {message.role === "user" ? (
-                                <div className="flex my-2 justify-end">
-                                  <div
-                                    key={message.id + index}
-                                    className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1"
-                                  >
-                                    {currentText}
+      {interviewEnded ? (
+        <div className="min-h-screen bg-gray-200 text-black font-normal w-full bg-slate-100 flex flex-col items-center justify-center overflow-y-auto pb-2">
+          You have completed the interview. Our recruiter will review your your
+          response and let you know the next steps.
+        </div>
+      ) : (
+        <div className="min-h-screen bg-white w-full bg-slate-100">
+          {/*  */}
+          <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
+            <div className="relative w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
+              <div className="relative flex flex-col justify-center rounded-lg bg-white">
+                {messages.map((message: Message, index: number) => {
+                  return (
+                    // Chat History
+                    <div
+                      key={message.id}
+                      className="flex flex-col gird grid-cols-8"
+                    >
+                      {message.content
+                        .split("\n")
+                        .map((currentText: string, index: number) => {
+                          if (currentText === "") {
+                            return (
+                              <p key={index + message.id}>&nbsp;&nbsp;&nbsp;</p>
+                            );
+                          } else {
+                            return (
+                              <>
+                                {message.role === "user" ? (
+                                  <div className="flex my-2 justify-end">
+                                    <div
+                                      key={message.id + index}
+                                      className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1"
+                                    >
+                                      {currentText}
+                                    </div>
+                                    <div className="mx-2">
+                                      <button className="rounded-full bg-blue-500 p-1 text-white">
+                                        <CircleUserIcon size={24} />
+                                      </button>
+                                    </div>
                                   </div>
-                                  <div className="mx-2">
-                                    <button className="rounded-full bg-blue-500 p-1 text-white">
-                                      <CircleUserIcon size={24} />
-                                    </button>
+                                ) : (
+                                  <div className="flex my-2 justify-start">
+                                    <div className="mx-2">
+                                      <button className="rounded-full bg-sky-100 p-1 text-white">
+                                        <Sparkles
+                                          className="text-blue-600 p-0.5"
+                                          strokeWidth={2}
+                                          size={22}
+                                        />
+                                      </button>
+                                    </div>
+                                    <div
+                                      key={message.id + index}
+                                      className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg"
+                                    >
+                                      {currentText}
+                                    </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <div className="flex my-2 justify-start">
-                                  <div className="mx-2">
-                                    <button className="rounded-full bg-sky-100 p-1 text-white">
-                                      <Sparkles
-                                        className="text-blue-600 p-0.5"
-                                        strokeWidth={2}
-                                        size={22}
-                                      />
-                                    </button>
-                                  </div>
-                                  <div
-                                    key={message.id + index}
-                                    className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg"
-                                  >
-                                    {currentText}
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          );
-                        }
-                      })}
-                  </div>
-                );
-              })}
+                                )}
+                              </>
+                            );
+                          }
+                        })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          {/* Input */}
-          <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
-            <div className="w-full flex justify-center items-center">
-              <button
-                className={cn(
-                  "flex justify-center text-sm items-center bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-semibold font-sans h-[48px] text-white",
-                  !startInterview &&
-                    "bg-blue-500 hover:bg-blue-600 hover:text-white",
-                  startInterview &&
-                    "bg-red-500 hover:bg-red-600 hover:text-white"
-                )}
-                onClick={() => {
-                  setRecordingReady((prev) => !prev);
-                  setRecordingStared((prev) => !prev);
-                  if (startInterview) {
-                    setEndInterview((prev) => !prev);
-                  } else {
-                    setStartInterview((prev) => !prev);
-                  }
-                  handleButtonClick();
-                }}
-              >
-                <LogOutIcon size={16} className="mr-2" />{" "}
-                {recordingStared ? "End" : "Start"} {"Interview"}
-              </button>
+            {/* Input */}
+            <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
+              <div className="w-full flex justify-center items-center">
+                <button
+                  className={cn(
+                    "flex justify-center text-sm items-center bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-semibold font-sans h-[48px] text-white",
+                    !startInterview &&
+                      "bg-blue-500 hover:bg-blue-600 hover:text-white",
+                    startInterview &&
+                      "bg-red-500 hover:bg-red-600 hover:text-white"
+                  )}
+                  onClick={() => {
+                    setRecordingReady((prev) => !prev);
+                    setRecordingStared((prev) => !prev);
+                    if (startInterview) {
+                      setEndInterview((prev) => !prev);
+                    } else {
+                      setStartInterview((prev) => !prev);
+                    }
+                    handleButtonClick();
+                  }}
+                >
+                  <LogOutIcon size={16} className="mr-2" />{" "}
+                  {recordingStared ? "End" : "Start"} {"Interview"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
