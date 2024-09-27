@@ -364,6 +364,19 @@ export default function Home() {
                   {recordingStared ? "End" : "Start"} {"Interview"}
                 </button>
               </div>
+
+              {/* Recognized Transcript */}
+              <div className="w-full  flex flex-col items-center justify-center text-white font-semibold rounded-md">
+                <div
+                  className={cn(
+                    "bg-transparent",
+                    input.length > 0 &&
+                      "bg-black bg-opacity-80 rouned-lg px-1 py-0.5 w-fit"
+                  )}
+                >
+                  {input}
+                </div>
+              </div>
             </div>
           </div>
         </div>
