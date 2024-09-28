@@ -274,7 +274,7 @@ export default function Home() {
           You have completed the interview. Our recruiter will review your your
           response and let you know the next steps.
         </div>
-      ) : (
+      ) : startInterview ? (
         <div className="min-h-screen bg-white w-full bg-slate-100">
           {/*  */}
           <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
@@ -385,6 +385,11 @@ export default function Home() {
               {/*  */}
             </div>
           </div>
+        </div>
+      ) : (
+        <div className="min-h-screen bg-white w-full bg-slate-100">
+          {/*  */}
+          You will be interviewed in the next step.
         </div>
       )}
     </>
