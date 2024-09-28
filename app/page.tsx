@@ -181,7 +181,7 @@ export default function Home() {
       speechToken.region
     );
 
-    speechConfig.speechSynthesisVoiceName = "EN-US-AriaNeural";
+    speechConfig.speechSynthesisVoiceName = "en-US-AvaMultilingualNeural";
     const speechSynthesizer = new SpeechSynthesizer(speechConfig);
 
     speechSynthesizer.speakTextAsync(
@@ -241,7 +241,7 @@ export default function Home() {
       const timeSinceLastUpdate = Date.now() - lastUpdate;
       if (
         !aiResponseFinished &&
-        timeSinceLastUpdate >= 2500 &&
+        timeSinceLastUpdate >= 2000 &&
         input.length > 0
       ) {
         setInput(combinedTranscript);
@@ -251,11 +251,21 @@ export default function Home() {
       }
       setLastUpdate(Date.now());
       setAiResponseFinished(false);
-    }, 2500);
+    }, 2000);
 
     // Clean up the timer
     return () => clearInterval(interval);
   }, [lastUpdate, aiResponseFinished]);
+
+  // Dispaly the recognized text
+  useEffect(() => {
+    // dispatch the recognized text to the input field
+    if (recognizingTranscript) {
+      setCombinedTranscript(recognizedTranscript + recognizingTranscript);
+      setInput(combinedTranscript);
+      setLastUpdate(Date.now());
+    }
+  }, [recognizingTranscript, recognizedTranscript, handleInputChange]);
 
   return (
     <>
