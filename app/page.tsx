@@ -116,34 +116,7 @@ const useSpeechRecognition = (
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, setInput } =
     useChat({
-      initialMessages: [
-        {
-          id: "1",
-          role: "system",
-          content:
-            "You are a helpful assistant that translates English to French.",
-        },
-        {
-          id: "2",
-          role: "user",
-          content: "Hello, how are you doing?",
-        },
-        {
-          id: "3",
-          role: "assistant",
-          content: "Bonjour, comment allez-vous?",
-        },
-        {
-          id: "4",
-          role: "user",
-          content: "I'm doing well, thank you. How are you?",
-        },
-        {
-          id: "5",
-          role: "assistant",
-          content: "Je vais bien, merci. Comment allez-vous?",
-        },
-      ],
+      initialMessages: [],
       keepLastMessageOnError: true,
       onFinish: async (message: Message) => {
         setAiResponseFinished(true);
@@ -225,6 +198,20 @@ export default function Home() {
         speechSynthesizer.close();
       }
     );
+  };
+
+  // sensitivity (time it takes to auto upload the reconized transcript)
+  const sensitivity = (currentText: string, index: number) => {
+    if (index == 0 || index === messages.length - 1) {
+      // wait 0.8 second
+      const timer = setTimeout(() => {
+        console.log("Timer Expired");
+      }, 800);
+      () => clearTimeout(timer);
+      return currentText;
+    } else {
+      return currentText;
+    }
   };
 
   // Trigger text to speech
