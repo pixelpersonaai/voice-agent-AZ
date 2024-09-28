@@ -1,7 +1,7 @@
 "use client";
 import { Message, useChat } from "ai/react";
 import { CircleUserIcon, LogOutIcon, Sparkles } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   AudioConfig,
   ResultReason,
@@ -184,6 +184,14 @@ export default function Home() {
       console.error("Error fetching starting message:", error);
     }
   };
+  const count = useRef(0);
+  useEffect(() => {
+    if (messages.length === 0 && count.current == 0) {
+      startingMessage();
+      setRecordingReady(true);
+      count.current += 1;
+    }
+  }, [messages]);
 
   // Text to Speech
   const textToSpeech = async (message: Message) => {
@@ -377,6 +385,7 @@ export default function Home() {
                   {input}
                 </div>
               </div>
+              {/*  */}
             </div>
           </div>
         </div>
