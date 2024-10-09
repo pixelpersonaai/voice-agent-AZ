@@ -365,8 +365,7 @@ export default function Home() {
                     }
                   }}
                 >
-                  <LogOutIcon size={16} className="mr-2" />{" "}
-                  {recordingStared ? "End" : "Start"} {"Interview"}
+                  <LogOutIcon size={16} className="mr-2" /> {"End Interview"}
                 </button>
               </div>
 
