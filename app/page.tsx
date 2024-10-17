@@ -274,7 +274,7 @@ export default function Home() {
           You have completed the interview. Our recruiter will review your your
           response and let you know the next steps.
         </div>
-      ) : startInterview ? (
+      ) : (
         <div className="min-h-screen bg-white w-full bg-slate-100">
           {/*  */}
           <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
@@ -385,26 +385,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="min-h-screen bg-gray-200  w-full bg-slate-100 flex flex-col items-center justify-center overflow-y-auto pb-2">
-          <div className="w-3/5 text-black font-normal font-sans">
-            Congrats on being selected for moving forward with the interview! In
-            this stage, our virtual assistant will ask you some questions to get
-            to know you better. Please answer the questions as accurately as
-            possible.
-          </div>
-          <div className="mt-4">
-            <button
-              onClick={() => {
-                setStartInterview((prev) => !prev);
-              }}
-              className="bg-black text-white font-semibold font-sans px-8 py-1 rounded-lg hover:bg-gray-800"
-            >
-              Start
-            </button>
-          </div>
-        </div>
-      )}
+      ) }
     </>
   );
 }
