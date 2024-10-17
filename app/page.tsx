@@ -116,7 +116,6 @@ const useSpeechRecognition = (
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, setInput } =
     useChat({
-      initialMessages: [],
       keepLastMessageOnError: true,
       onFinish: async (message: Message) => {
         setAiResponseFinished(true);
@@ -157,6 +156,8 @@ export default function Home() {
       console.error("Error fetching starting message:", error);
     }
   };
+
+  // Get Starting Messages
   const count = useRef(0);
   useEffect(() => {
     if (messages.length === 0 && count.current == 0) {
