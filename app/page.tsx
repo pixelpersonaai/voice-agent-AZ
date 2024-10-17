@@ -29,7 +29,7 @@ const useSpeechRecognition = (
       try {
         const { authToken, region } = await getTokens();
         const config = SpeechConfig.fromAuthorizationToken(authToken, region);
-        config.speechRecognitionLanguage = "zh-CN";
+        config.speechRecognitionLanguage = "en-US";
 
         setSpeechConfig(config);
 
@@ -94,7 +94,6 @@ const useSpeechRecognition = (
         };
 
         recognizer.startContinuousRecognitionAsync();
-
         setSpeechRecognizer(recognizer);
       }
     } catch (error) {
@@ -152,6 +151,9 @@ export default function Home() {
       // console.log("startingMessage: ", response);
       const data = await response.json();
       messages.push(data);
+      setAiResponseFinished(false);
+      setRecordingReady(false);
+      textToSpeech(messages[messages.length - 1]);
     } catch (error) {
       console.error("Error fetching starting message:", error);
     }
@@ -166,6 +168,24 @@ export default function Home() {
       count.current += 1;
     }
   }, [messages]);
+
+  // Trigger text to speech
+  useEffect(() => {
+    if (aiResponseFinished && messages.length > 0) {
+      if (messages[messages.length - 1].role === "assistant") {
+        textToSpeech(messages[messages.length - 1]);
+        const timer = setTimeout(() => {
+          setIsAISpeaking(false);
+        }, aiSpeakingDuration);
+        return () => {
+          setIsAISpeaking(false);
+          clearTimeout(timer);
+          setIsAISpeaking(false);
+        };
+      }
+    }
+    console.log(messages);
+  }, [aiResponseFinished]);
 
   // Text to Speech
   const textToSpeech = async (message: Message) => {
@@ -189,7 +209,6 @@ export default function Home() {
       message.content,
       (result) => {
         speechSynthesizer.close();
-        // console.log("Play Time：", result.audioDuration / 10000000);
         setAiSpeakingDuration(result.audioDuration / 10000000);
         setIsAISpeaking(true);
         return result.audioData;
@@ -215,23 +234,18 @@ export default function Home() {
     }
   };
 
-  // Trigger text to speech
+  
+
+  // Dispaly the recognized text
   useEffect(() => {
-    if (aiResponseFinished && messages.length > 0) {
-      if (messages[messages.length - 1].role === "assistant") {
-        textToSpeech(messages[messages.length - 1]);
-        const timer = setTimeout(() => {
-          setIsAISpeaking(false);
-        }, aiSpeakingDuration);
-        return () => {
-          setIsAISpeaking(false);
-          clearTimeout(timer);
-          setIsAISpeaking(false);
-        };
-      }
+    // dispatch the recognized text to the input field
+    if (recognizingTranscript) {
+      setCombinedTranscript(recognizedTranscript + recognizingTranscript);
+      setInput(combinedTranscript);
+      setLastUpdate(Date.now());
     }
-    console.log(messages);
-  }, [aiResponseFinished]);
+  }, [recognizingTranscript, recognizedTranscript, handleInputChange]);
+
 
   // Automatically submit the form after 2 seconds of inactivity
   const [lastUpdate, setLastUpdate] = useState(Date.now());
@@ -258,16 +272,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [lastUpdate, aiResponseFinished]);
 
-  // Dispaly the recognized text
-  useEffect(() => {
-    // dispatch the recognized text to the input field
-    if (recognizingTranscript) {
-      setCombinedTranscript(recognizedTranscript + recognizingTranscript);
-      setInput(combinedTranscript);
-      setLastUpdate(Date.now());
-    }
-  }, [recognizingTranscript, recognizedTranscript, handleInputChange]);
-
+  
   return (
     <>
       {interviewEnded ? (
@@ -291,18 +296,17 @@ export default function Home() {
                     >
                       {message.content
                         .split("\n")
-                        .map((currentText: string, index: number) => {
+                        .map((currentText: string, lineIndex: number) => {
                           if (currentText === "") {
                             return (
-                              <p key={index + message.id}>&nbsp;&nbsp;&nbsp;</p>
+                              <p key={`${message.id}-${lineIndex}`}>&nbsp;&nbsp;&nbsp;</p>
                             );
                           } else {
                             return (
                               <>
                                 {message.role === "user" ? (
-                                  <div className="flex my-2 justify-end">
+                                  <div className="flex my-2 justify-end" key={`${message.id}+${lineIndex}`}>
                                     <div
-                                      key={message.id + index}
                                       className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1"
                                     >
                                       {currentText}
@@ -314,7 +318,7 @@ export default function Home() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="flex my-2 justify-start">
+                                  <div className="flex my-2 justify-start" key={`${message.id}-${lineIndex}`}>
                                     <div className="mx-2">
                                       <button className="rounded-full bg-sky-100 p-1 text-white">
                                         <Sparkles
@@ -325,7 +329,6 @@ export default function Home() {
                                       </button>
                                     </div>
                                     <div
-                                      key={message.id + index}
                                       className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg"
                                     >
                                       {currentText}
