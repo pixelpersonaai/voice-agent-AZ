@@ -39,16 +39,16 @@ SPEECH_KEY=
 ```
 
 ## Customization
-1. Startring Message
+1. **Startring Message**: 
     Change the initial greeting or starting message that the AI agent says to the user.
-    Look for the startingMessage file in the api route and modify its value.
+    Look for the ```startingMessage.ts``` file in the api route and modify its value.
 
-2. Agent Functionality
-    You can adjust the functionality of the voice agent in chat api, including how it processes input and responds. Custom agent logic can be added to the core AI processing functions.
+2. **Agent Functionality**: 
+    You can adjust the functionality of the voice agent in ```chat``` api, including how it processes input and responds. Custom agent logic can be added to the core AI processing functions.
 
-3. Input Submission Speed (Dialog Gap)
+3. **Input Submission Speed (Dialog Gap)**: 
     The speed at which the agent recognizes gaps in the user’s input can be tweaked.
-    Adjust the time between dialog interactions (the waiting time for input) by modifying the timeSinceLastUpdate setting in useEffect().
+    Adjust the time between dialog interactions (the waiting time for input) by modifying the ```timeSinceLastUpdate`` setting in useEffect().
 
 
 ## Next Steps
