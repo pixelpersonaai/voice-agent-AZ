@@ -1,6 +1,11 @@
 "use client";
 import { Message, useChat } from "ai/react";
-import { CircleUserIcon, LogOutIcon, Sparkles } from "lucide-react";
+import {
+  AudioLinesIcon,
+  CircleUserIcon,
+  Sparkles,
+  SquareIcon,
+} from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   AudioConfig,
@@ -133,6 +138,8 @@ export default function Home() {
   const [combinedTranscript, setCombinedTranscript] = useState("");
   const [recognizedTranscript, setRecognizedTranscript] = useState("");
   const [recognizingTranscript, setRecognizingTranscript] = useState("");
+  const [speechSynthesizer, setSpeechSynthesizer] =
+    useState<SpeechSynthesizer | null>(null);
 
   const { handleButtonClick, stopRecognition } = useSpeechRecognition(
     setRecognizedTranscript,
@@ -187,6 +194,20 @@ export default function Home() {
     console.log(messages);
   }, [aiResponseFinished]);
 
+  const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  // Stop AI Speech
+  const stopAISpeech = () => {
+    console.log("Pause Pressed 1");
+    console.log("AudioPlayer: ", audioPlayer);
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.currentTime = -1;
+
+      setIsAISpeaking(false);
+    }
+  };
+
   // Text to Speech
   const textToSpeech = async (message: Message) => {
     if (!speechToken) {
@@ -203,21 +224,33 @@ export default function Home() {
     );
 
     speechConfig.speechSynthesisVoiceName = "en-US-AvaMultilingualNeural";
-    const speechSynthesizer = new SpeechSynthesizer(speechConfig);
+    const synthesizer = new SpeechSynthesizer(speechConfig);
+    setSpeechSynthesizer(synthesizer);
 
-    speechSynthesizer.speakTextAsync(
-      message.content,
-      (result) => {
-        speechSynthesizer.close();
-        setAiSpeakingDuration(result.audioDuration / 10000000);
-        setIsAISpeaking(true);
-        return result.audioData;
-      },
-      (error) => {
-        console.log(error);
-        speechSynthesizer.close();
-      }
-    );
+    return new Promise((resolve, reject) => {
+      synthesizer.speakTextAsync(
+        message.content,
+        (result) => {
+          synthesizer.close();
+          setAiSpeakingDuration(result.audioDuration / 10000000);
+          setIsAISpeaking(true);
+
+          const audioBlob = new Blob([result.audioData], {
+            type: "audio/mpeg",
+          });
+          setAudioUrl(URL.createObjectURL(audioBlob));
+          setAudioPlayer(new Audio(audioUrl));
+          console.log("xxx: ", result.audioDuration);
+          audioPlayer?.play();
+          resolve(audioPlayer);
+        },
+        (error) => {
+          console.log(error);
+          synthesizer.close();
+          reject(error);
+        }
+      );
+    });
   };
 
   // sensitivity (time it takes to auto upload the reconized transcript)
@@ -234,8 +267,6 @@ export default function Home() {
     }
   };
 
-  
-
   // Dispaly the recognized text
   useEffect(() => {
     // dispatch the recognized text to the input field
@@ -245,7 +276,6 @@ export default function Home() {
       setLastUpdate(Date.now());
     }
   }, [recognizingTranscript, recognizedTranscript, handleInputChange]);
-
 
   // Automatically submit the form after 2 seconds of inactivity
   const [lastUpdate, setLastUpdate] = useState(Date.now());
@@ -272,124 +302,142 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [lastUpdate, aiResponseFinished]);
 
-  
   return (
     <>
-      {interviewEnded ? (
+      {/* {interviewEnded ? (
         <div className="min-h-screen bg-gray-200 text-black font-normal w-full bg-slate-100 flex flex-col items-center justify-center overflow-y-auto pb-2">
           You have completed the interview. Our recruiter will review your your
           response and let you know the next steps.
         </div>
-      ) : (
-        <div className="min-h-screen bg-white w-full bg-slate-100">
-          {/*  */}
-          <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
-            <div className="relative w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
-              <div className="relative flex flex-col justify-center rounded-lg bg-white">
-                {messages.map((message: Message, index: number) => {
-                  return (
-                    // Chat History
-                    <div
-                      key={message.id}
-                      className="flex flex-col gird grid-cols-8"
-                    >
-                      {message.content
-                        .split("\n")
-                        .map((currentText: string, lineIndex: number) => {
-                          if (currentText === "") {
-                            return (
-                              <p key={`${message.id}-${lineIndex}`}>&nbsp;&nbsp;&nbsp;</p>
-                            );
-                          } else {
-                            return (
-                              <>
-                                {message.role === "user" ? (
-                                  <div className="flex my-2 justify-end" key={`${message.id}+${lineIndex}`}>
-                                    <div
-                                      className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1"
-                                    >
-                                      {currentText}
-                                    </div>
-                                    <div className="mx-2">
-                                      <button className="rounded-full bg-blue-500 p-1 text-white">
-                                        <CircleUserIcon size={24} />
-                                      </button>
-                                    </div>
+      ) : ( */}
+      <div className="min-h-screen bg-white w-full bg-slate-100">
+        {/*  */}
+        <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
+          <div className=" relative max-h-[50vh] w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md ">
+            <div className="absolute inset-0 p-4 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
+            <div className="relative max-h-4/5 flex flex-col justify-center rounded-lg bg-white overflow-y-auto">
+              {messages.map((message: Message, index: number) => {
+                return (
+                  // Chat History
+                  <div
+                    key={message.id}
+                    className="flex flex-col gird grid-cols-8"
+                  >
+                    {message.content
+                      .split("\n")
+                      .map((currentText: string, lineIndex: number) => {
+                        if (currentText === "") {
+                          return (
+                            <p key={`${message.id}-${lineIndex}`}>
+                              &nbsp;&nbsp;&nbsp;
+                            </p>
+                          );
+                        } else {
+                          return (
+                            <>
+                              {message.role === "user" ? (
+                                <div
+                                  className="flex my-2 justify-end"
+                                  key={`${message.id}+${lineIndex}`}
+                                >
+                                  <div className="bg-sky-100 text-sm text-blue-700 rounded-lg ml-12 px-2 py-1">
+                                    {currentText}
                                   </div>
-                                ) : (
-                                  <div className="flex my-2 justify-start" key={`${message.id}-${lineIndex}`}>
-                                    <div className="mx-2">
-                                      <button className="rounded-full bg-sky-100 p-1 text-white">
-                                        <Sparkles
-                                          className="text-blue-600 p-0.5"
-                                          strokeWidth={2}
-                                          size={22}
-                                        />
-                                      </button>
-                                    </div>
-                                    <div
-                                      className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg"
-                                    >
-                                      {currentText}
-                                    </div>
+                                  <div className="mx-2">
+                                    <button className="rounded-full bg-blue-500 p-1 text-white">
+                                      <CircleUserIcon size={24} />
+                                    </button>
                                   </div>
-                                )}
-                              </>
-                            );
-                          }
-                        })}
-                    </div>
-                  );
-                })}
-              </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className="flex my-2 justify-start"
+                                  key={`${message.id}-${lineIndex}`}
+                                >
+                                  <div className="mx-2">
+                                    <button className="rounded-full bg-sky-100 p-1 text-white">
+                                      <Sparkles
+                                        className="text-blue-600 p-0.5"
+                                        strokeWidth={2}
+                                        size={22}
+                                      />
+                                    </button>
+                                  </div>
+                                  <div className="bg-blue-500 text-sm text-white mr-12 px-2 py-1 rounded-lg">
+                                    {currentText}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        }
+                      })}
+                  </div>
+                );
+              })}
             </div>
-            {/* Input */}
-            <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
-              <div className="w-full flex justify-center items-center">
+          </div>
+          {/* Input */}
+          <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
+            <div className="flex space-x-4">
+              {recordingReady ? (
+                <div className="flex items-center bg-blue-500 text-white rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-600 bg-white ">
+                  <span className="flex justify-center items-center w-full text-gray-400">
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                    <AudioLinesIcon size={24} />
+                  </span>
+                  <button
+                    className="flex justify-end items-center p-0.5 border border-transparent  hover:border-red-500 hover:rounded-sm"
+                    onClick={() => {
+                      setRecordingReady((prev) => !prev);
+                      stopRecognition();
+                      // stop the speech synthesis
+                    }}
+                  >
+                    <SquareIcon
+                      size={20}
+                      className="bg-red-500 text-red-500 rounded-sm"
+                    />
+                  </button>
+                </div>
+              ) : (
                 <button
-                  className={cn(
-                    "flex justify-center text-sm items-center bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-semibold font-sans h-[48px] text-white",
-                    !startInterview &&
-                      "bg-blue-500 hover:bg-blue-600 hover:text-white",
-                    startInterview &&
-                      "bg-red-500 hover:bg-red-600 hover:text-white"
-                  )}
+                  className="bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-blue-100 hover:bg-blue-500 hover:text-white"
                   onClick={() => {
                     setRecordingReady((prev) => !prev);
                     setRecordingStared((prev) => !prev);
-                    if (startInterview) {
-                      setEndInterview((prev) => !prev);
-                    } else {
-                      setStartInterview((prev) => !prev);
-                    }
+                    setAiResponseFinished(false);
                     handleButtonClick();
-                    if (!interviewEnded && startInterview) {
-                      setInterviewEnded((prev) => !prev);
-                    }
                   }}
                 >
-                  <LogOutIcon size={16} className="mr-2" /> {"End Interview"}
+                  Click to Talk
                 </button>
-              </div>
-
-              {/* Recognized Transcript */}
-              <div className="w-full  flex flex-col items-center justify-center text-white font-semibold rounded-md">
-                <div
-                  className={cn(
-                    "bg-transparent",
-                    input.length > 0 &&
-                      "bg-black bg-opacity-80 rouned-lg px-1 py-0.5 w-fit"
-                  )}
-                >
-                  {input}
-                </div>
-              </div>
-              {/*  */}
+              )}
+              <button
+                className="bg-red-500 text-white rounded-lg font-bold h-[48px] w-[48px] flex items-center justify-center hover:bg-red-600"
+                onClick={() => stopAISpeech()}
+              >
+                Stop
+              </button>
             </div>
           </div>
         </div>
-      ) }
+
+        <div className="w-full  flex flex-col items-center justify-center text-white font-semibold rounded-md">
+          <div
+            className={cn(
+              "bg-transparent",
+              input.length > 0 &&
+                "bg-black bg-opacity-80 rouned-lg px-1 py-0.5 w-fit"
+            )}
+          >
+            {input}
+          </div>
+        </div>
+      </div>
+      {/* )} */}
     </>
   );
 }
