@@ -127,9 +127,6 @@ export default function Home() {
       },
     });
   let speechToken: any;
-  const [interviewEnded, setInterviewEnded] = useState(false);
-  const [startInterview, setStartInterview] = useState(false);
-  const [endInterview, setEndInterview] = useState(false);
   const [recordingReady, setRecordingReady] = useState(false);
   const [recordingStared, setRecordingStared] = useState(false);
   const [aiSpeakingDuration, setAiSpeakingDuration] = useState(0);
@@ -202,6 +199,7 @@ export default function Home() {
     console.log("AudioPlayer: ", audioPlayer);
     if (audioPlayer) {
       audioPlayer.pause();
+
       audioPlayer.currentTime = -1;
 
       setIsAISpeaking(false);
@@ -235,14 +233,15 @@ export default function Home() {
           setAiSpeakingDuration(result.audioDuration / 10000000);
           setIsAISpeaking(true);
 
-          const audioBlob = new Blob([result.audioData], {
-            type: "audio/mpeg",
-          });
-          setAudioUrl(URL.createObjectURL(audioBlob));
-          setAudioPlayer(new Audio(audioUrl));
-          console.log("xxx: ", result.audioDuration);
-          audioPlayer?.play();
-          resolve(audioPlayer);
+          // const audioBlob = new Blob([result.audioData], {
+          //   type: "audio/mpeg",
+          // });
+          // setAudioUrl(URL.createObjectURL(audioBlob));
+          // setAudioPlayer(new Audio(audioUrl));
+          // console.log("xxx: ", result.audioDuration);
+          // audioPlayer?.play();
+          // resolve(audioPlayer);
+          resolve(result.audioData);
         },
         (error) => {
           console.log(error);
