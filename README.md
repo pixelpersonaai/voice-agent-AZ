@@ -1,5 +1,6 @@
 # voice-agent-AZ
 
+
 # AI Voice Agent Pipeline (Azure AI Speech)
 
 This project implements an AI voice agent pipeline using **Azure AI Speech**.
@@ -9,6 +10,9 @@ greeting.
 
 The codebase is written in **Next.js**. The setup process and customization
 options are detailed below.
+
+---
+![Screenshot of the chat interface](https://i.imgur.com/s0hoic4.png)
 
 ---
 
@@ -23,6 +27,20 @@ options are detailed below.
 ---
 
 ## Installation
+**Clone the Repository**: 
+```
+git clone https://github.com/pixelpersonaai/voice-agent-AZ.git
+cd voice-agent-az
+code .
+```
+**Install Dependencies**
+```
+npm install 
+```
+**Setup the Development Server**
+```
+npm run dev
+```
 
 ## Environmental Variables
 
@@ -48,11 +66,13 @@ SPEECH_KEY=
 
 3. **Input Submission Speed (Dialog Gap)**: 
     The speed at which the agent recognizes gaps in the user’s input can be tweaked.
-    Adjust the time between dialog interactions (the waiting time for input) by modifying the ```timeSinceLastUpdate`` setting in useEffect().
+    Adjust the time between dialog interactions (the waiting time for input) by modifying the ```timeSinceLastUpdate``` setting in useEffect().
 
 
 ## Next Steps
-Improving the Interruption Mechanism: The current version of the pipeline can be further improved to handle interruptions more smoothly (i.e., the user speaking over the agent). Future updates should focus on enhancing this feature.
+**Improving the Interruption Mechanism**: The current version of the pipeline can be further improved to handle interruptions more smoothly (i.e., the user speaking over the agent). Future updates should focus on enhancing this feature.
+
+**AI Agent Workflow**: Agent(s) can be added to the chat API route to perform actions (such as use tools), use RAG to improve reponse accuracy, and make plans.
 
 ## License
 This project is licensed under the Apache 2.0 License. See the LICENSE file for more details.
