@@ -199,25 +199,24 @@ export default function Home() {
   }, [aiResponseFinished]);
 
   const [isPaused, setIsPaused] = useState(false); // Flag to track whether speech is paused
-  let currentChunkIndex = 0; // Track the current chunk being synthesized
-  const [chunks, setChunks] = useState<string[]>([]); // Store text chunks
+  let currentChunkIndex = 0;
+  const [chunks, setChunks] = useState<string[]>([]);
 
-  const splitTextIntoChunks = (text: string, maxLength = 200) => {
+  const splitTextIntoChunks = (text: string, maxLength = 500) => {
     // Regular expression to split text at punctuation (sentence enders and commas)
     const sentenceEnders = /([.!?])\s+/g;
 
-    const words = text.split(/\s+/); // Split text into words
-    let tempChunks: string[] = [];
-    let currentChunk = "";
     // Split the text into sentences based on punctuation marks
     let sentences = text.split(sentenceEnders).filter(Boolean); // Removes empty elements
+
+    let currentChunk = "";
 
     for (let i = 0; i < sentences.length; i++) {
       let sentence = sentences[i];
 
       // If adding the current sentence exceeds the max length, push the current chunk
       if (currentChunk.length + sentence.length > maxLength) {
-        chunks.push(currentChunk.trim()); // Add the current chunk to the chunks array
+        setChunks((prev) => [...prev, currentChunk.trim()]);
         currentChunk = sentence; // Start a new chunk with the current sentence
       } else {
         currentChunk += sentence + " "; // Add sentence to current chunk
@@ -226,11 +225,8 @@ export default function Home() {
 
     // Push the last chunk
     if (currentChunk.trim().length > 0) {
-      tempChunks.push(currentChunk.trim());
+      chunks.push(currentChunk.trim());
     }
-
-    // Update the state with the new chunks
-    setChunks(tempChunks);
 
     return chunks;
   };
@@ -267,14 +263,14 @@ export default function Home() {
     synthesizer.speakTextAsync(
       chunks[currentChunkIndex],
       (result) => {
-        currentChunkIndex++; // Move to next chunk
+        currentChunkIndex++;
 
         if (currentChunkIndex < chunks.length && !isPaused) {
-          speakNextChunk(); // Continue if not paused
+          speakNextChunk();
         } else {
           synthesizer.close();
           setAiSpeakingDuration(result.audioDuration / 10000000);
-          setIsAISpeaking(false); // Speech finished
+          setIsAISpeaking(false);
         }
       },
       (error) => {
@@ -345,12 +341,6 @@ export default function Home() {
 
   return (
     <>
-      {/* {interviewEnded ? (
-        <div className="min-h-screen bg-gray-200 text-black font-normal w-full bg-slate-100 flex flex-col items-center justify-center overflow-y-auto pb-2">
-          You have completed the interview. Our recruiter will review your your
-          response and let you know the next steps.
-        </div>
-      ) : ( */}
       <div className="min-h-screen bg-white w-full bg-slate-100">
         {/*  */}
         <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
