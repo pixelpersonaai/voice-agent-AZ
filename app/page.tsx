@@ -191,21 +191,6 @@ export default function Home() {
     console.log(messages);
   }, [aiResponseFinished]);
 
-  const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
-  const [audioUrl, setAudioUrl] = useState("");
-  // Stop AI Speech
-  const stopAISpeech = () => {
-    console.log("Pause Pressed 1");
-    console.log("AudioPlayer: ", audioPlayer);
-    if (audioPlayer) {
-      audioPlayer.pause();
-
-      audioPlayer.currentTime = -1;
-
-      setIsAISpeaking(false);
-    }
-  };
-
   const [isPaused, setIsPaused] = useState(false); // Flag to track whether speech is paused
   let currentChunkIndex = 0; // Track the current chunk being synthesized
   let chunks = []; // Store text chunks
@@ -468,7 +453,7 @@ export default function Home() {
                 </div>
               ) : (
                 <button
-                  className="bg-blue-500 bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-blue-100 hover:bg-blue-500 hover:text-white"
+                  className="bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-blue-100 hover:bg-blue-500 hover:text-white"
                   onClick={() => {
                     setRecordingReady((prev) => !prev);
                     setRecordingStared((prev) => !prev);
@@ -479,12 +464,6 @@ export default function Home() {
                   Click to Talk
                 </button>
               )}
-              <button
-                className="bg-red-500 text-white rounded-lg font-bold h-[48px] w-[48px] flex items-center justify-center hover:bg-red-600"
-                onClick={() => stopAISpeech()}
-              >
-                Stop
-              </button>
             </div>
           </div>
         </div>
