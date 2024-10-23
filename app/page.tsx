@@ -6,7 +6,14 @@ import {
   Sparkles,
   SquareIcon,
 } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  use,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   AudioConfig,
   ResultReason,
@@ -193,16 +200,17 @@ export default function Home() {
 
   const [isPaused, setIsPaused] = useState(false); // Flag to track whether speech is paused
   let currentChunkIndex = 0; // Track the current chunk being synthesized
-  let chunks = []; // Store text chunks
+  const [chunks, setChunks] = useState<string[]>([]); // Store text chunks
 
-  const splitTextIntoChunks = (text: string, maxLength = 500) => {
+  const splitTextIntoChunks = (text: string, maxLength = 200) => {
     // Regular expression to split text at punctuation (sentence enders and commas)
     const sentenceEnders = /([.!?])\s+/g;
 
+    const words = text.split(/\s+/); // Split text into words
+    let tempChunks: string[] = [];
+    let currentChunk = "";
     // Split the text into sentences based on punctuation marks
     let sentences = text.split(sentenceEnders).filter(Boolean); // Removes empty elements
-
-    let currentChunk = "";
 
     for (let i = 0; i < sentences.length; i++) {
       let sentence = sentences[i];
@@ -218,8 +226,11 @@ export default function Home() {
 
     // Push the last chunk
     if (currentChunk.trim().length > 0) {
-      chunks.push(currentChunk.trim());
+      tempChunks.push(currentChunk.trim());
     }
+
+    // Update the state with the new chunks
+    setChunks(tempChunks);
 
     return chunks;
   };
@@ -244,10 +255,13 @@ export default function Home() {
     setSpeechSynthesizer(synthesizer);
 
     // Split the message into smaller chunks
-    const chunks = splitTextIntoChunks(message.content);
+    setChunks(splitTextIntoChunks(message.content));
 
     const speakNextChunk = () => {
-      if (isPaused || currentChunkIndex >= chunks.length) return;
+      if (isPaused || currentChunkIndex >= chunks.length) {
+        setChunks([]);
+        return;
+      }
     };
 
     synthesizer.speakTextAsync(
@@ -271,33 +285,6 @@ export default function Home() {
 
     // Start speaking
     speakNextChunk();
-
-    return new Promise((resolve, reject) => {
-      resolve("Speech synthesis started.");
-    });
-
-    // return new Promise((resolve, reject) => {
-    //   synthesizer.speakTextAsync(
-    //     message.content,
-    //     (result) => {
-    //       synthesizer.close();
-    //       setAiSpeakingDuration(result.audioDuration / 10000000);
-    //       setIsAISpeaking(true);
-    //       resolve(result.audioData);
-    //     },
-    //     (error) => {
-    //       console.log(error);
-    //       synthesizer.close();
-    //       reject(error);
-    //     }
-    //   );
-    // });
-  };
-
-  const InterruptSpeech = () => {
-    if (isPaused === false) {
-      setIsPaused((prev) => !prev); // Toggle pause state
-    }
   };
 
   // sensitivity (time it takes to auto upload the reconized transcript)
@@ -313,6 +300,13 @@ export default function Home() {
       return currentText;
     }
   };
+
+  // stop the speech in real time
+  useEffect(() => {
+    if (recognizingTranscript.length > 0) {
+      setIsPaused(true);
+    }
+  }, [recognizingTranscript]);
 
   // Dispaly the recognized text
   useEffect(() => {
