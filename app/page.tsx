@@ -206,6 +206,39 @@ export default function Home() {
     }
   };
 
+  const [isPaused, setIsPaused] = useState(false); // Flag to track whether speech is paused
+  let currentChunkIndex = 0; // Track the current chunk being synthesized
+  let chunks = []; // Store text chunks
+
+  const splitTextIntoChunks = (text: string, maxLength = 500) => {
+    // Regular expression to split text at punctuation (sentence enders and commas)
+    const sentenceEnders = /([.!?])\s+/g;
+
+    // Split the text into sentences based on punctuation marks
+    let sentences = text.split(sentenceEnders).filter(Boolean); // Removes empty elements
+
+    let currentChunk = "";
+
+    for (let i = 0; i < sentences.length; i++) {
+      let sentence = sentences[i];
+
+      // If adding the current sentence exceeds the max length, push the current chunk
+      if (currentChunk.length + sentence.length > maxLength) {
+        chunks.push(currentChunk.trim()); // Add the current chunk to the chunks array
+        currentChunk = sentence; // Start a new chunk with the current sentence
+      } else {
+        currentChunk += sentence + " "; // Add sentence to current chunk
+      }
+    }
+
+    // Push the last chunk
+    if (currentChunk.trim().length > 0) {
+      chunks.push(currentChunk.trim());
+    }
+
+    return chunks;
+  };
+
   // Text to Speech
   const textToSpeech = async (message: Message) => {
     if (!speechToken) {
@@ -225,31 +258,61 @@ export default function Home() {
     const synthesizer = new SpeechSynthesizer(speechConfig);
     setSpeechSynthesizer(synthesizer);
 
-    return new Promise((resolve, reject) => {
-      synthesizer.speakTextAsync(
-        message.content,
-        (result) => {
+    // Split the message into smaller chunks
+    const chunks = splitTextIntoChunks(message.content);
+
+    const speakNextChunk = () => {
+      if (isPaused || currentChunkIndex >= chunks.length) return;
+    };
+
+    synthesizer.speakTextAsync(
+      chunks[currentChunkIndex],
+      (result) => {
+        currentChunkIndex++; // Move to next chunk
+
+        if (currentChunkIndex < chunks.length && !isPaused) {
+          speakNextChunk(); // Continue if not paused
+        } else {
           synthesizer.close();
           setAiSpeakingDuration(result.audioDuration / 10000000);
-          setIsAISpeaking(true);
-
-          // const audioBlob = new Blob([result.audioData], {
-          //   type: "audio/mpeg",
-          // });
-          // setAudioUrl(URL.createObjectURL(audioBlob));
-          // setAudioPlayer(new Audio(audioUrl));
-          // console.log("xxx: ", result.audioDuration);
-          // audioPlayer?.play();
-          // resolve(audioPlayer);
-          resolve(result.audioData);
-        },
-        (error) => {
-          console.log(error);
-          synthesizer.close();
-          reject(error);
+          setIsAISpeaking(false); // Speech finished
         }
-      );
+      },
+      (error) => {
+        console.log(error);
+        synthesizer.close();
+      }
+    );
+
+    // Start speaking
+    speakNextChunk();
+
+    return new Promise((resolve, reject) => {
+      resolve("Speech synthesis started.");
     });
+
+    // return new Promise((resolve, reject) => {
+    //   synthesizer.speakTextAsync(
+    //     message.content,
+    //     (result) => {
+    //       synthesizer.close();
+    //       setAiSpeakingDuration(result.audioDuration / 10000000);
+    //       setIsAISpeaking(true);
+    //       resolve(result.audioData);
+    //     },
+    //     (error) => {
+    //       console.log(error);
+    //       synthesizer.close();
+    //       reject(error);
+    //     }
+    //   );
+    // });
+  };
+
+  const InterruptSpeech = () => {
+    if (isPaused === false) {
+      setIsPaused((prev) => !prev); // Toggle pause state
+    }
   };
 
   // sensitivity (time it takes to auto upload the reconized transcript)
@@ -313,7 +376,9 @@ export default function Home() {
         {/*  */}
         <div className="w-full flex flex-col items-center justify-center h-[98vh] overflow-y-auto pb-2">
           <div className=" relative max-h-[50vh] w-3/5 flex flex-col justify-center bg-white rounded-lg shadow-md ">
-            <div className="absolute inset-0 p-4 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
+            {messages.length > 0 && (
+              <div className="absolute inset-0 p-4 bg-gradient-to-br from-pink-700 via-yellow-300 via-blue-500 to-purple-600 rounded-lg blur animate-pulse"></div>
+            )}
             <div className="relative max-h-4/5 flex flex-col justify-center rounded-lg bg-white overflow-y-auto">
               {messages.map((message: Message, index: number) => {
                 return (
