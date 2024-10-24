@@ -328,7 +328,8 @@ export default function Home() {
       if (
         !aiResponseFinished &&
         timeSinceLastUpdate >= 2000 &&
-        input.length > 0
+        input.length > 0 &&
+        !textMode
       ) {
         setInput(combinedTranscript);
         handleSubmit();
@@ -417,7 +418,7 @@ export default function Home() {
           {/* Input */}
           <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
             <div className="flex space-x-4">
-              {textMode ? (
+              {!textMode ? (
                 recordingReady ? (
                   <div className="flex items-center bg-blue-500 text-white rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-600 bg-white ">
                     <span className="flex justify-center items-center w-full text-gray-400">
@@ -492,7 +493,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="w-full  flex flex-col items-center justify-center text-white font-semibold rounded-md">
+        <div className="flex flex-col items-center justify-center w-full text-white font-semibold rounded-md">
           <div
             className={cn(
               "bg-transparent",
