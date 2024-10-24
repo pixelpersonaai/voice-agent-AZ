@@ -3,6 +3,8 @@ import { Message, useChat } from "ai/react";
 import {
   AudioLinesIcon,
   CircleUserIcon,
+  KeyboardIcon,
+  MicIcon,
   SendHorizonalIcon,
   Sparkles,
   SquareIcon,
@@ -472,6 +474,20 @@ export default function Home() {
                   </button>
                 </div>
               )}
+
+              <button
+                className="flex items-center justify-center bg-blue-500 text-blue-600 font-bold h-[48px] w-[48px] rounded-lg hover:bg-blue-600 hover:text-white"
+                onClick={() => {
+                  setTextMode((prev) => !prev);
+                  textMode ? null : stopRecognition();
+                }}
+              >
+                {textMode ? (
+                  <MicIcon className="text-white" size={24} />
+                ) : (
+                  <KeyboardIcon className="text-white" size={24} />
+                )}
+              </button>
             </div>
           </div>
         </div>
