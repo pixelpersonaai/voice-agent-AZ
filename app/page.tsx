@@ -203,7 +203,7 @@ export default function Home() {
   }, [aiResponseFinished]);
 
   const [isPaused, setIsPaused] = useState(false); // Flag to track whether speech is paused
-  let currentChunkIndex = 0;
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [chunks, setChunks] = useState<string[]>([]);
 
   const splitTextIntoChunks = (text: string, maxLength = 500) => {
@@ -254,12 +254,28 @@ export default function Home() {
     const synthesizer = new SpeechSynthesizer(speechConfig);
     setSpeechSynthesizer(synthesizer);
 
+    // Traditional turn based chat without chunking
+    // synthesizer.speakTextAsync(
+    //   message.content,
+    //   (result) => {
+    //     synthesizer.close();
+    //     setAiSpeakingDuration(result.audioDuration / 10000000);
+    //     setIsAISpeaking(true);
+    //     return result.audioData;
+    //   },
+    //   (error) => {
+    //     console.log(error);
+    //     synthesizer.close();
+    //   }
+    // );
+
     // Split the message into smaller chunks
     setChunks(splitTextIntoChunks(message.content));
 
     const speakNextChunk = () => {
       if (isPaused || currentChunkIndex >= chunks.length) {
         setChunks([]);
+        setCurrentChunkIndex(0);
         return;
       }
     };
@@ -267,7 +283,7 @@ export default function Home() {
     synthesizer.speakTextAsync(
       chunks[currentChunkIndex],
       (result) => {
-        currentChunkIndex++;
+        setCurrentChunkIndex((prev) => prev + 1);
 
         if (currentChunkIndex < chunks.length && !isPaused) {
           speakNextChunk();
@@ -481,6 +497,8 @@ export default function Home() {
                 onClick={() => {
                   setTextMode((prev) => !prev);
                   textMode ? null : stopRecognition();
+                  setRecordingReady(false);
+                  setRecordingStared(false);
                 }}
               >
                 {textMode ? (
