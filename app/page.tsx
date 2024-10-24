@@ -497,8 +497,10 @@ export default function Home() {
                 onClick={() => {
                   setTextMode((prev) => !prev);
                   textMode ? null : stopRecognition();
-                  setRecordingReady(false);
-                  setRecordingStared(false);
+                  textMode ? setRecordingReady(false) : setRecordingReady(true);
+                  textMode
+                    ? setRecordingStared(false)
+                    : setRecordingStared(true);
                 }}
               >
                 {textMode ? (
