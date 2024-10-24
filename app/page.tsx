@@ -3,6 +3,7 @@ import { Message, useChat } from "ai/react";
 import {
   AudioLinesIcon,
   CircleUserIcon,
+  SendHorizonalIcon,
   Sparkles,
   SquareIcon,
 } from "lucide-react";
@@ -144,6 +145,7 @@ export default function Home() {
   const [recognizingTranscript, setRecognizingTranscript] = useState("");
   const [speechSynthesizer, setSpeechSynthesizer] =
     useState<SpeechSynthesizer | null>(null);
+  const [textMode, setTextMode] = useState(false);
 
   const { handleButtonClick, stopRecognition } = useSpeechRecognition(
     setRecognizedTranscript,
@@ -413,40 +415,62 @@ export default function Home() {
           {/* Input */}
           <div className="h-fit w-[415px] flex flex-col justify-between items-end my-2">
             <div className="flex space-x-4">
-              {recordingReady ? (
-                <div className="flex items-center bg-blue-500 text-white rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-600 bg-white ">
-                  <span className="flex justify-center items-center w-full text-gray-400">
-                    <AudioLinesIcon size={24} />
-                    <AudioLinesIcon size={24} />
-                    <AudioLinesIcon size={24} />
-                    <AudioLinesIcon size={24} />
-                  </span>
+              {textMode ? (
+                recordingReady ? (
+                  <div className="flex items-center bg-blue-500 text-white rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-600 bg-white ">
+                    <span className="flex justify-center items-center w-full text-gray-400">
+                      <AudioLinesIcon size={24} />
+                      <AudioLinesIcon size={24} />
+                      <AudioLinesIcon size={24} />
+                      <AudioLinesIcon size={24} />
+                    </span>
+                    <button
+                      className="flex justify-end items-center p-0.5 border border-transparent  hover:border-red-500 hover:rounded-sm"
+                      onClick={() => {
+                        setRecordingReady((prev) => !prev);
+                        stopRecognition();
+                        // stop the speech synthesis
+                      }}
+                    >
+                      <SquareIcon
+                        size={20}
+                        className="bg-red-500 text-red-500 rounded-sm"
+                      />
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    className="flex justify-end items-center p-0.5 border border-transparent  hover:border-red-500 hover:rounded-sm"
+                    className="bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-blue-100 hover:bg-blue-500 hover:text-white"
                     onClick={() => {
                       setRecordingReady((prev) => !prev);
-                      stopRecognition();
-                      // stop the speech synthesis
+                      setRecordingStared((prev) => !prev);
+                      setAiResponseFinished(false);
+                      handleButtonClick();
                     }}
                   >
-                    <SquareIcon
-                      size={20}
-                      className="bg-red-500 text-red-500 rounded-sm"
+                    Click to Talk
+                  </button>
+                )
+              ) : (
+                <div className="flex items-center focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 focus-within:rounded-lg w-[352px] h-[48px]">
+                  <input
+                    type="text"
+                    className="bg-blue-500 text-black rounded-l-lg font-bold h-[48px] w-full text-blue-600 bg-white px-4 py-2 focus:outline-none border border-r-0 focus:border-transparent"
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                    }}
+                    value={input}
+                  />
+                  <button
+                    className="flex items-center justify-center bg-white h-[48px] w-[48px] rounded-r-lg cursor-pointer border border-l-0"
+                    onClick={handleSubmit}
+                  >
+                    <SendHorizonalIcon
+                      size={24}
+                      className="hover:text-blue-500 text-gray-300"
                     />
                   </button>
                 </div>
-              ) : (
-                <button
-                  className="bottom-0 inset-x-0 rounded-lg px-4 font-bold w-[352px] h-[48px] text-blue-500 bg-blue-100 hover:bg-blue-500 hover:text-white"
-                  onClick={() => {
-                    setRecordingReady((prev) => !prev);
-                    setRecordingStared((prev) => !prev);
-                    setAiResponseFinished(false);
-                    handleButtonClick();
-                  }}
-                >
-                  Click to Talk
-                </button>
               )}
             </div>
           </div>
